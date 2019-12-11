@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require 'jwt/security_utils'
+require 'hiq-jwt/security_utils'
 require 'openssl'
-require 'jwt/algos/hmac'
-require 'jwt/algos/eddsa'
-require 'jwt/algos/ecdsa'
-require 'jwt/algos/rsa'
-require 'jwt/algos/ps'
-require 'jwt/algos/unsupported'
+require 'hiq-jwt/algos/hmac'
+require 'hiq-jwt/algos/eddsa'
+require 'hiq-jwt/algos/ecdsa'
+require 'hiq-jwt/algos/rsa'
+require 'hiq-jwt/algos/ps'
+require 'hiq-jwt/algos/unsupported'
 begin
   require 'rbnacl'
 rescue LoadError
@@ -15,7 +15,7 @@ rescue LoadError
 end
 
 # JWT::Signature module
-module JWT
+module HiqJWT
   # Signature logic for JWT
   module Signature
     extend self
@@ -42,9 +42,9 @@ module JWT
         alg.const_get(:SUPPORTED).include? algorithm
       end
       verified = algo.verify(ToVerify.new(algorithm, key, signing_input, signature))
-      raise(JWT::VerificationError, 'Signature verification raised') unless verified
+      raise(HiqJWT::VerificationError, 'Signature verification raised') unless verified
     rescue OpenSSL::PKey::PKeyError
-      raise JWT::VerificationError, 'Signature verification raised'
+      raise HiqJWT::VerificationError, 'Signature verification raised'
     ensure
       OpenSSL.errors.clear
     end

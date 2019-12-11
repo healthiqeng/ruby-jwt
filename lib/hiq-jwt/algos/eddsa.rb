@@ -1,4 +1,4 @@
-module JWT
+module HiqJWT
   module Algos
     module Eddsa
       module_function

@@ -1,9 +1,9 @@
 require 'spec_helper'
-require 'jwt'
-require 'jwt/encode'
-require 'jwt/decode'
+require 'hiq-jwt'
+require 'hiq-jwt/encode'
+require 'hiq-jwt/decode'
 
-describe JWT do
+describe HiqJWT do
   let(:payload) { { 'user_id' => 'some@user.tld' } }
 
   let :data do
@@ -46,13 +46,13 @@ describe JWT do
     let(:alg) { 'none' }
 
     it 'should generate a valid token' do
-      token = JWT.encode payload, nil, alg
+      token = HiqJWT.encode payload, nil, alg
 
       expect(token).to eq data['NONE']
     end
 
     it 'should decode a valid token' do
-      jwt_payload, header = JWT.decode data['NONE'], nil, false
+      jwt_payload, header = HiqJWT.decode data['NONE'], nil, false
 
       expect(header['alg']).to eq alg
       expect(jwt_payload).to eq payload
@@ -62,32 +62,32 @@ describe JWT do
   context 'payload validation' do
     it 'validates the payload with the ClaimsValidator if the payload is a hash' do
       validator = double()
-      expect(JWT::ClaimsValidator).to receive(:new) { validator }
+      expect(HiqJWT::ClaimsValidator).to receive(:new) { validator }
       expect(validator).to receive(:validate!) { true }
 
       payload = {}
-      JWT.encode payload, "secret", JWT::Algos::Hmac::SUPPORTED.sample
+      HiqJWT.encode payload, "secret", HiqJWT::Algos::Hmac::SUPPORTED.sample
     end
 
     it 'does not validate the payload if it is not present' do
       validator = double()
-      expect(JWT::ClaimsValidator).not_to receive(:new) { validator }
+      expect(HiqJWT::ClaimsValidator).not_to receive(:new) { validator }
 
       payload = nil
-      JWT.encode payload, "secret", JWT::Algos::Hmac::SUPPORTED.sample
+      HiqJWT.encode payload, "secret", HiqJWT::Algos::Hmac::SUPPORTED.sample
     end
   end
 
   %w[HS256 HS512256 HS384 HS512].each do |alg|
     context "alg: #{alg}" do
       it 'should generate a valid token' do
-        token = JWT.encode payload, data[:secret], alg
+        token = HiqJWT.encode payload, data[:secret], alg
 
         expect(token).to eq data[alg]
       end
 
       it 'should decode a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data[:secret], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data[:secret], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
@@ -95,13 +95,13 @@ describe JWT do
 
       it 'wrong secret should raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], 'wrong_secret', true, algorithm: alg
-        end.to raise_error JWT::VerificationError
+          HiqJWT.decode data[alg], 'wrong_secret', true, algorithm: alg
+        end.to raise_error HiqJWT::VerificationError
       end
 
       it 'wrong secret and verify = false should not raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], 'wrong_secret', false
+          HiqJWT.decode data[alg], 'wrong_secret', false
         end.not_to raise_error
       end
     end
@@ -110,13 +110,13 @@ describe JWT do
   %w[RS256 RS384 RS512].each do |alg|
     context "alg: #{alg}" do
       it 'should generate a valid token' do
-        token = JWT.encode payload, data[:rsa_private], alg
+        token = HiqJWT.encode payload, data[:rsa_private], alg
 
         expect(token).to eq data[alg]
       end
 
       it 'should decode a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data[:rsa_public], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data[:rsa_public], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
@@ -126,15 +126,15 @@ describe JWT do
         key = OpenSSL::PKey.read File.read(File.join(CERT_PATH, 'rsa-2048-wrong-public.pem'))
 
         expect do
-          JWT.decode data[alg], key, true, algorithm: alg
-        end.to raise_error JWT::DecodeError
+          HiqJWT.decode data[alg], key, true, algorithm: alg
+        end.to raise_error HiqJWT::DecodeError
       end
 
       it 'wrong key and verify = false should not raise JWT::DecodeError' do
         key = OpenSSL::PKey.read File.read(File.join(CERT_PATH, 'rsa-2048-wrong-public.pem'))
 
         expect do
-          JWT.decode data[alg], key, false
+          HiqJWT.decode data[alg], key, false
         end.not_to raise_error
       end
     end
@@ -143,20 +143,20 @@ describe JWT do
   %w[ED25519].each do |alg|
     context "alg: #{alg}" do
       before(:each) do
-        data[alg] = JWT.encode payload, data["#{alg}_private"], alg
+        data[alg] = HiqJWT.encode payload, data["#{alg}_private"], alg
       end
 
       let(:wrong_key) { OpenSSL::PKey.read(File.read(File.join(CERT_PATH, 'ec256-wrong-public.pem'))) }
 
       it 'should generate a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
       end
 
       it 'should decode a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
@@ -164,13 +164,13 @@ describe JWT do
 
       it 'wrong key should raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key
-        end.to raise_error JWT::DecodeError
+          HiqJWT.decode data[alg], wrong_key
+        end.to raise_error HiqJWT::DecodeError
       end
 
       it 'wrong key and verify = false should not raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key, false
+          HiqJWT.decode data[alg], wrong_key, false
         end.not_to raise_error
       end
     end
@@ -179,20 +179,20 @@ describe JWT do
   %w[ES256 ES384 ES512].each do |alg|
     context "alg: #{alg}" do
       before(:each) do
-        data[alg] = JWT.encode payload, data["#{alg}_private"], alg
+        data[alg] = HiqJWT.encode payload, data["#{alg}_private"], alg
       end
 
       let(:wrong_key) { OpenSSL::PKey.read(File.read(File.join(CERT_PATH, 'ec256-wrong-public.pem'))) }
 
       it 'should generate a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
       end
 
       it 'should decode a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data["#{alg}_public"], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
@@ -200,13 +200,13 @@ describe JWT do
 
       it 'wrong key should raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key
-        end.to raise_error JWT::DecodeError
+          HiqJWT.decode data[alg], wrong_key
+        end.to raise_error HiqJWT::DecodeError
       end
 
       it 'wrong key and verify = false should not raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key, false
+          HiqJWT.decode data[alg], wrong_key, false
         end.not_to raise_error
       end
     end
@@ -215,7 +215,7 @@ describe JWT do
   %w[PS256 PS384 PS512].each do |alg|
     context "alg: #{alg}" do
       before(:each) do
-        data[alg] = JWT.encode payload, data[:rsa_private], alg
+        data[alg] = HiqJWT.encode payload, data[:rsa_private], alg
       end
 
       let(:wrong_key) { data[:wrong_rsa_public] }
@@ -231,17 +231,17 @@ describe JWT do
         # Validate signature is made of up header and body of JWT
         translated_alg  = alg.gsub('PS', 'sha')
         valid_signature = data[:rsa_public].verify_pss(
-          translated_alg,
-          JWT::Base64.url_decode(signature),
-          [header, body].join('.'),
-          salt_length: :auto,
-          mgf1_hash:   translated_alg
+            translated_alg,
+            HiqJWT::Base64.url_decode(signature),
+            [header, body].join('.'),
+            salt_length: :auto,
+            mgf1_hash:   translated_alg
         )
         expect(valid_signature).to be true
       end
 
       it 'should decode a valid token' do
-        jwt_payload, header = JWT.decode data[alg], data[:rsa_public], true, algorithm: alg
+        jwt_payload, header = HiqJWT.decode data[alg], data[:rsa_public], true, algorithm: alg
 
         expect(header['alg']).to eq alg
         expect(jwt_payload).to eq payload
@@ -249,13 +249,13 @@ describe JWT do
 
       it 'wrong key should raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key
-        end.to raise_error JWT::DecodeError
+          HiqJWT.decode data[alg], wrong_key
+        end.to raise_error HiqJWT::DecodeError
       end
 
       it 'wrong key and verify = false should not raise JWT::DecodeError' do
         expect do
-          JWT.decode data[alg], wrong_key, false
+          HiqJWT.decode data[alg], wrong_key, false
         end.not_to raise_error
       end
     end
@@ -264,7 +264,7 @@ describe JWT do
   context 'Invalid' do
     it 'algorithm should raise NotImplementedError' do
       expect do
-        JWT.encode payload, 'secret', 'HS255'
+        HiqJWT.encode payload, 'secret', 'HS255'
       end.to raise_error NotImplementedError
     end
 
@@ -273,49 +273,49 @@ describe JWT do
       key.generate_key
 
       expect do
-        JWT.encode payload, key, 'ES256'
-      end.to raise_error JWT::IncorrectAlgorithm
+        HiqJWT.encode payload, key, 'ES256'
+      end.to raise_error HiqJWT::IncorrectAlgorithm
 
-      token = JWT.encode payload, data['ES256_private'], 'ES256'
+      token = HiqJWT.encode payload, data['ES256_private'], 'ES256'
       key.private_key = nil
 
       expect do
-        JWT.decode token, key
-      end.to raise_error JWT::IncorrectAlgorithm
+        HiqJWT.decode token, key
+      end.to raise_error HiqJWT::IncorrectAlgorithm
     end
   end
 
   context 'Verify' do
     context 'algorithm' do
       it 'should raise JWT::IncorrectAlgorithm on mismatch' do
-        token = JWT.encode payload, data[:secret], 'HS256'
+        token = HiqJWT.encode payload, data[:secret], 'HS256'
 
         expect do
-          JWT.decode token, data[:secret], true, algorithm: 'HS384'
-        end.to raise_error JWT::IncorrectAlgorithm
+          HiqJWT.decode token, data[:secret], true, algorithm: 'HS384'
+        end.to raise_error HiqJWT::IncorrectAlgorithm
 
         expect do
-          JWT.decode token, data[:secret], true, algorithm: 'HS256'
+          HiqJWT.decode token, data[:secret], true, algorithm: 'HS256'
         end.not_to raise_error
       end
 
       it 'should raise JWT::IncorrectAlgorithm when algorithms array does not contain algorithm' do
-        token = JWT.encode payload, data[:secret], 'HS512'
+        token = HiqJWT.encode payload, data[:secret], 'HS512'
 
         expect do
-          JWT.decode token, data[:secret], true, algorithms: ['HS384']
-        end.to raise_error JWT::IncorrectAlgorithm
+          HiqJWT.decode token, data[:secret], true, algorithms: ['HS384']
+        end.to raise_error HiqJWT::IncorrectAlgorithm
 
         expect do
-          JWT.decode token, data[:secret], true, algorithms: ['HS512', 'HS384']
+          HiqJWT.decode token, data[:secret], true, algorithms: ['HS512', 'HS384']
         end.not_to raise_error
       end
 
       context 'no algorithm provided' do
         it 'should use the default decode algorithm' do
-          token = JWT.encode payload, data[:rsa_public].to_s
+          token = HiqJWT.encode payload, data[:rsa_public].to_s
 
-          jwt_payload, header = JWT.decode token, data[:rsa_public].to_s
+          jwt_payload, header = HiqJWT.decode token, data[:rsa_public].to_s
 
           expect(header['alg']).to eq 'HS256'
           expect(jwt_payload).to eq payload
@@ -324,17 +324,17 @@ describe JWT do
     end
 
     context 'issuer claim' do
-      let(:iss) { 'ruby-jwt-gem' }
-      let(:invalid_token) { JWT.encode payload, data[:secret] }
+      let(:iss) { 'ruby-hiq-hiq-jwt-gem' }
+      let(:invalid_token) { HiqJWT.encode payload, data[:secret] }
 
       let :token do
         iss_payload = payload.merge(iss: iss)
-        JWT.encode iss_payload, data[:secret]
+        HiqJWT.encode iss_payload, data[:secret]
       end
 
       it 'if verify_iss is set to false (default option) should not raise JWT::InvalidIssuerError' do
         expect do
-          JWT.decode token, data[:secret], true, iss: iss, algorithm: 'HS256'
+          HiqJWT.decode token, data[:secret], true, iss: iss, algorithm: 'HS256'
         end.not_to raise_error
       end
     end
@@ -342,32 +342,32 @@ describe JWT do
 
   context 'a token with no segments' do
     it 'raises JWT::DecodeError' do
-      expect { JWT.decode('ThisIsNotAValidJWTToken', nil, true) }.to raise_error(JWT::DecodeError, 'Not enough or too many segments')
+      expect { HiqJWT.decode('ThisIsNotAValidJWTToken', nil, true) }.to raise_error(HiqJWT::DecodeError, 'Not enough or too many segments')
     end
   end
 
   context 'a token with not enough segments' do
     it 'raises JWT::DecodeError' do
-      expect { JWT.decode('ThisIsNotAValidJWTToken.second', nil, true) }.to raise_error(JWT::DecodeError, 'Not enough or too many segments')
+      expect { HiqJWT.decode('ThisIsNotAValidJWTToken.second', nil, true) }.to raise_error(HiqJWT::DecodeError, 'Not enough or too many segments')
     end
   end
 
   context 'a token with not too many segments' do
     it 'raises JWT::DecodeError' do
-      expect { JWT.decode('ThisIsNotAValidJWTToken.second.third.signature', nil, true) }.to raise_error(JWT::DecodeError, 'Not enough or too many segments')
+      expect { HiqJWT.decode('ThisIsNotAValidJWTToken.second.third.signature', nil, true) }.to raise_error(HiqJWT::DecodeError, 'Not enough or too many segments')
     end
   end
 
   context 'a token with two segments but does not require verifying' do
     it 'raises something else than "Not enough or too many segments"' do
-      expect { JWT.decode('ThisIsNotAValidJWTToken.second', nil, false) }.to raise_error(JWT::DecodeError, 'Invalid segment encoding')
+      expect { HiqJWT.decode('ThisIsNotAValidJWTToken.second', nil, false) }.to raise_error(HiqJWT::DecodeError, 'Invalid segment encoding')
     end
   end
 
   context 'Base64' do
     it 'urlsafe replace + / with - _' do
       allow(Base64).to receive(:encode64) { 'string+with/non+url-safe/characters_' }
-      expect(JWT::Base64.url_encode('foo')).to eq('string-with_non-url-safe_characters_')
+      expect(HiqJWT::Base64.url_encode('foo')).to eq('string-with_non-url-safe_characters_')
     end
   end
 
@@ -377,31 +377,31 @@ describe JWT do
     sign = 'Skpi6FfYMbZ-DwW9ocyRIosNMdPMAIWRLYxRO68GTQk'
 
     expect do
-      JWT.decode([head, load, sign].join('.'), '', false)
+      HiqJWT.decode([head, load, sign].join('.'), '', false)
     end.not_to raise_error
   end
 
   it 'should not raise InvalidPayload exception if payload is an array' do
     expect do
-      JWT.encode(['my', 'payload'], 'secret')
+      HiqJWT.encode(['my', 'payload'], 'secret')
     end.not_to raise_error
   end
 
   it 'should encode string payloads' do
     expect do
-      JWT.encode 'Hello World', 'secret'
+      HiqJWT.encode 'Hello World', 'secret'
     end.not_to raise_error
   end
 
   context 'when the alg value is given as a header parameter' do
 
     it 'does not override the actual algorithm used' do
-      headers = JSON.parse(::JWT::Base64.url_decode(JWT.encode('Hello World', 'secret', 'HS256', { alg: 'HS123'}).split('.').first))
+      headers = JSON.parse(::HiqJWT::Base64.url_decode(HiqJWT.encode('Hello World', 'secret', 'HS256', {alg: 'HS123'}).split('.').first))
       expect(headers['alg']).to eq('HS256')
     end
 
     it "should generate the same token" do
-      expect(JWT.encode('Hello World', 'secret', 'HS256', { alg: 'HS256'})).to eq JWT.encode('Hello World', 'secret', 'HS256')
+      expect(HiqJWT.encode('Hello World', 'secret', 'HS256', {alg: 'HS256'})).to eq HiqJWT.encode('Hello World', 'secret', 'HS256')
     end
   end
 end

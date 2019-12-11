@@ -1,4 +1,4 @@
-module JWT
+module HiqJWT
   # Collection of security methods
   #
   # @see: https://github.com/rails/rails/blob/master/activesupport/lib/active_support/security_utils.rb

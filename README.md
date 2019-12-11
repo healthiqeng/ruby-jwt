@@ -41,7 +41,7 @@ See: [ JSON Web Algorithms (JWA) 3.1. "alg" (Algorithm) Header Parameter Values 
 * none - unsigned token
 
 ```ruby
-require 'jwt'
+require 'hiq-jwt'
 
 payload = { data: 'test' }
 
@@ -228,7 +228,7 @@ token = JWT.encode payload, key, algorithm='HS256', header_fields={}
 **Example:**
 
 ```ruby
-require 'jwt'
+require 'hiq-jwt'
 
 payload = { data: 'test' }
 

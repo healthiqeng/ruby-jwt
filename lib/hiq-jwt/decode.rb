@@ -2,14 +2,14 @@
 
 require 'json'
 
-require 'jwt/signature'
-require 'jwt/verify'
+require 'hiq-jwt/signature'
+require 'hiq-jwt/verify'
 # JWT::Decode module
-module JWT
+module HiqJWT
   # Decoding logic for JWT
   class Decode
     def initialize(jwt, key, verify, options, &keyfinder)
-      raise(JWT::DecodeError, 'Nil JSON web token') unless jwt
+      raise(HiqJWT::DecodeError, 'Nil JSON web token') unless jwt
       @jwt = jwt
       @key = key
       @options = options
@@ -26,7 +26,7 @@ module JWT
         verify_signature
         verify_claims
       end
-      raise(JWT::DecodeError, 'Not enough or too many segments') unless header && payload
+      raise(HiqJWT::DecodeError, 'Not enough or too many segments') unless header && payload
       [payload, header]
     end
 
@@ -34,10 +34,10 @@ module JWT
 
     def verify_signature
       @key = find_key(&@keyfinder) if @keyfinder
-      @key = ::JWT::JWK::KeyFinder.new(jwks: @options[:jwks]).key_for(header['kid']) if @options[:jwks]
+      @key = ::HiqJWT::JWK::KeyFinder.new(jwks: @options[:jwks]).key_for(header['kid']) if @options[:jwks]
 
-      raise(JWT::IncorrectAlgorithm, 'An algorithm must be specified') if allowed_algorithms.empty?
-      raise(JWT::IncorrectAlgorithm, 'Expected a different algorithm') unless options_includes_algo_in_header?
+      raise(HiqJWT::IncorrectAlgorithm, 'An algorithm must be specified') if allowed_algorithms.empty?
+      raise(HiqJWT::IncorrectAlgorithm, 'Expected a different algorithm') unless options_includes_algo_in_header?
 
       Signature.verify(header['alg'], @key, signing_input, @signature)
     end
@@ -56,7 +56,7 @@ module JWT
 
     def find_key(&keyfinder)
       key = (keyfinder.arity == 2 ? yield(header, payload) : yield(header))
-      raise JWT::DecodeError, 'No verification key available' unless key
+      raise HiqJWT::DecodeError, 'No verification key available' unless key
       key
     end
 
@@ -68,7 +68,7 @@ module JWT
       return if segment_length == 3
       return if !@verify && segment_length == 2 # If no verifying required, the signature is not needed
 
-      raise(JWT::DecodeError, 'Not enough or too many segments')
+      raise(HiqJWT::DecodeError, 'Not enough or too many segments')
     end
 
     def segment_length
@@ -76,7 +76,7 @@ module JWT
     end
 
     def decode_crypto
-      @signature = JWT::Base64.url_decode(@segments[2])
+      @signature = HiqJWT::Base64.url_decode(@segments[2])
     end
 
     def header
@@ -92,9 +92,9 @@ module JWT
     end
 
     def parse_and_decode(segment)
-      JWT::JSON.parse(JWT::Base64.url_decode(segment))
+      HiqJWT::JSON.parse(HiqJWT::Base64.url_decode(segment))
     rescue ::JSON::ParserError
-      raise JWT::DecodeError, 'Invalid segment encoding'
+      raise HiqJWT::DecodeError, 'Invalid segment encoding'
     end
   end
 end

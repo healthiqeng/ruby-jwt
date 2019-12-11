@@ -2,7 +2,7 @@
 
 require 'json'
 
-module JWT
+module HiqJWT
   # JSON wrapper
   class JSON
     class << self

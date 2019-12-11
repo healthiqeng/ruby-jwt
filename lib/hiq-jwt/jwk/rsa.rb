@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module JWT
+module HiqJWT
   module JWK
     class RSA
       attr_reader :keypair

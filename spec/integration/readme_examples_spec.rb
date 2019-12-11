@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 require_relative '../spec_helper'
-require 'jwt'
+require 'hiq-jwt'
 
 describe 'README.md code test' do
   context 'algorithm usage' do
     let(:payload) { { data: 'test' } }
 
     it 'NONE' do
-      token = JWT.encode payload, nil, 'none'
-      decoded_token = JWT.decode token, nil, false
+      token = HiqJWT.encode payload, nil, 'none'
+      decoded_token = HiqJWT.decode token, nil, false
 
       expect(token).to eq 'eyJhbGciOiJub25lIn0.eyJkYXRhIjoidGVzdCJ9.'
       expect(decoded_token).to eq [
@@ -19,8 +19,8 @@ describe 'README.md code test' do
     end
 
     it 'HMAC' do
-      token = JWT.encode payload, 'my$ecretK3y', 'HS256'
-      decoded_token = JWT.decode token, 'my$ecretK3y', false
+      token = HiqJWT.encode payload, 'my$ecretK3y', 'HS256'
+      decoded_token = HiqJWT.decode token, 'my$ecretK3y', false
 
       expect(token).to eq 'eyJhbGciOiJIUzI1NiJ9.eyJkYXRhIjoidGVzdCJ9.pNIWIL34Jo13LViZAJACzK6Yf0qnvT_BuwOxiMCPE-Y'
       expect(decoded_token).to eq [
@@ -33,8 +33,8 @@ describe 'README.md code test' do
       rsa_private = OpenSSL::PKey::RSA.generate 2048
       rsa_public = rsa_private.public_key
 
-      token = JWT.encode payload, rsa_private, 'RS256'
-      decoded_token = JWT.decode token, rsa_public, true, algorithm: 'RS256'
+      token = HiqJWT.encode payload, rsa_private, 'RS256'
+      decoded_token = HiqJWT.decode token, rsa_public, true, algorithm: 'RS256'
 
       expect(decoded_token).to eq [
         { 'data' => 'test' },
@@ -48,8 +48,8 @@ describe 'README.md code test' do
       ecdsa_public = OpenSSL::PKey::EC.new ecdsa_key
       ecdsa_public.private_key = nil
 
-      token = JWT.encode payload, ecdsa_key, 'ES256'
-      decoded_token = JWT.decode token, ecdsa_public, true, algorithm: 'ES256'
+      token = HiqJWT.encode payload, ecdsa_key, 'ES256'
+      decoded_token = HiqJWT.decode token, ecdsa_public, true, algorithm: 'ES256'
 
       expect(decoded_token).to eq [
         { 'data' => 'test' },
@@ -61,8 +61,8 @@ describe 'README.md code test' do
       rsa_private = OpenSSL::PKey::RSA.generate 2048
       rsa_public = rsa_private.public_key
 
-      token = JWT.encode payload, rsa_private, 'PS256'
-      decoded_token = JWT.decode token, rsa_public, true, algorithm: 'PS256'
+      token = HiqJWT.encode payload, rsa_private, 'PS256'
+      decoded_token = HiqJWT.decode token, rsa_public, true, algorithm: 'PS256'
 
       expect(decoded_token).to eq [
         { 'data' => 'test' },
@@ -79,10 +79,10 @@ describe 'README.md code test' do
         exp = Time.now.to_i + 4 * 3600
         exp_payload = { data: 'data', exp: exp }
 
-        token = JWT.encode exp_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode exp_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, algorithm: 'HS256'
         end.not_to raise_error
       end
 
@@ -92,10 +92,10 @@ describe 'README.md code test' do
 
         exp_payload = { data: 'data', exp: exp }
 
-        token = JWT.encode exp_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode exp_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, leeway: leeway, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, leeway: leeway, algorithm: 'HS256'
         end.not_to raise_error
       end
     end
@@ -104,10 +104,10 @@ describe 'README.md code test' do
       it 'without leeway' do
         nbf = Time.now.to_i - 3600
         nbf_payload = { data: 'data', nbf: nbf }
-        token = JWT.encode nbf_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode nbf_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, algorithm: 'HS256'
         end.not_to raise_error
       end
 
@@ -115,10 +115,10 @@ describe 'README.md code test' do
         nbf = Time.now.to_i + 10
         leeway = 30
         nbf_payload = { data: 'data', nbf: nbf }
-        token = JWT.encode nbf_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode nbf_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, leeway: leeway, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, leeway: leeway, algorithm: 'HS256'
         end.not_to raise_error
       end
     end
@@ -127,10 +127,10 @@ describe 'README.md code test' do
       iss = 'My Awesome Company Inc. or https://my.awesome.website/'
       iss_payload = { data: 'data', iss: iss }
 
-      token = JWT.encode iss_payload, hmac_secret, 'HS256'
+      token = HiqJWT.encode iss_payload, hmac_secret, 'HS256'
 
       expect do
-        JWT.decode token, hmac_secret, true, iss: iss, algorithm: 'HS256'
+        HiqJWT.decode token, hmac_secret, true, iss: iss, algorithm: 'HS256'
       end.not_to raise_error
     end
 
@@ -139,10 +139,10 @@ describe 'README.md code test' do
         aud = %w[Young Old]
         aud_payload = { data: 'data', aud: aud }
 
-        token = JWT.encode aud_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode aud_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, aud: %w[Old Young], verify_aud: true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, aud: %w[Old Young], verify_aud: true, algorithm: 'HS256'
         end.not_to raise_error
       end
 
@@ -150,10 +150,10 @@ describe 'README.md code test' do
         aud = 'Kids'
         aud_payload = { data: 'data', aud: aud }
 
-        token = JWT.encode aud_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode aud_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, aud: 'Kids', verify_aud: true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, aud: 'Kids', verify_aud: true, algorithm: 'HS256'
         end.not_to raise_error
       end
     end
@@ -165,10 +165,10 @@ describe 'README.md code test' do
       jti = Digest::MD5.hexdigest(jti_raw)
       jti_payload = { data: 'data', iat: iat, jti: jti }
 
-      token = JWT.encode jti_payload, hmac_secret, 'HS256'
+      token = HiqJWT.encode jti_payload, hmac_secret, 'HS256'
 
       expect do
-        JWT.decode token, hmac_secret, true, verify_jti: true, algorithm: 'HS256'
+        HiqJWT.decode token, hmac_secret, true, verify_jti: true, algorithm: 'HS256'
       end.not_to raise_error
     end
 
@@ -177,10 +177,10 @@ describe 'README.md code test' do
         iat = Time.now.to_i
         iat_payload = { data: 'data', iat: iat }
 
-        token = JWT.encode iat_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode iat_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, verify_iat: true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, verify_iat: true, algorithm: 'HS256'
         end.not_to raise_error
       end
 
@@ -188,10 +188,10 @@ describe 'README.md code test' do
         iat = Time.now.to_i - 7
         iat_payload = { data: 'data', iat: iat, leeway: 10 }
 
-        token = JWT.encode iat_payload, hmac_secret, 'HS256'
+        token = HiqJWT.encode iat_payload, hmac_secret, 'HS256'
 
         expect do
-          JWT.decode token, hmac_secret, true, verify_iat: true, algorithm: 'HS256'
+          HiqJWT.decode token, hmac_secret, true, verify_iat: true, algorithm: 'HS256'
         end.not_to raise_error
       end
     end
@@ -200,8 +200,8 @@ describe 'README.md code test' do
       it 'with custom field' do
         payload = { data: 'test' }
 
-        token = JWT.encode payload, nil, 'none', typ: 'JWT'
-        _, header = JWT.decode token, nil, false
+        token = HiqJWT.encode payload, nil, 'none', typ: 'JWT'
+        _, header = HiqJWT.decode token, nil, false
 
         expect(header['typ']).to eq 'JWT'
       end
@@ -211,19 +211,19 @@ describe 'README.md code test' do
       sub = 'Subject'
       sub_payload = { data: 'data', sub: sub }
 
-      token = JWT.encode sub_payload, hmac_secret, 'HS256'
+      token = HiqJWT.encode sub_payload, hmac_secret, 'HS256'
 
       expect do
-        JWT.decode token, hmac_secret, true, 'sub' => sub, :verify_sub => true, :algorithm => 'HS256'
+        HiqJWT.decode token, hmac_secret, true, 'sub' => sub, :verify_sub => true, :algorithm => 'HS256'
       end.not_to raise_error
     end
 
 
     it 'JWK' do
-      jwk = JWT::JWK.new(OpenSSL::PKey::RSA.new(2048))
+      jwk = HiqJWT::JWK.new(OpenSSL::PKey::RSA.new(2048))
       payload, headers = { data: 'data' }, { kid: jwk.kid }
 
-      token = JWT.encode(payload, jwk.keypair, 'RS512', headers)
+      token = HiqJWT.encode(payload, jwk.keypair, 'RS512', headers)
 
       # The jwk loader would fetch the set of JWKs from a trusted source
       jwk_loader = ->(options) do
@@ -232,7 +232,7 @@ describe 'README.md code test' do
       end
 
       expect do
-        JWT.decode(token, nil, true, { algorithms: ['RS512'], jwks: jwk_loader})
+        HiqJWT.decode(token, nil, true, {algorithms: ['RS512'], jwks: jwk_loader})
       end.not_to raise_error
     end
   end

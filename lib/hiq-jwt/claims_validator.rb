@@ -1,6 +1,6 @@
 require_relative './error'
 
-module JWT
+module HiqJWT
   class ClaimsValidator
     INTEGER_CLAIMS = %i[
       exp

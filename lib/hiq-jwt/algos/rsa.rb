@@ -1,4 +1,4 @@
-module JWT
+module HiqJWT
   module Algos
     module Rsa
       module_function

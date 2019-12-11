@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module JWT
+module HiqJWT
   module JWK
     class KeyFinder
       def initialize(options)
@@ -10,13 +10,13 @@ module JWT
       end
 
       def key_for(kid)
-        raise ::JWT::DecodeError, 'No key id (kid) found from token headers' unless kid
+        raise ::HiqJWT::DecodeError, 'No key id (kid) found from token headers' unless kid
 
         jwk = resolve_key(kid)
 
-        raise ::JWT::DecodeError, "Could not find public key for kid #{kid}" unless jwk
+        raise ::HiqJWT::DecodeError, "Could not find public key for kid #{kid}" unless jwk
 
-        ::JWT::JWK.import(jwk).keypair
+        ::HiqJWT::JWK.import(jwk).keypair
       end
 
       private

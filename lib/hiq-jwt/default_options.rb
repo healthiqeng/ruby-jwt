@@ -1,4 +1,4 @@
-module JWT
+module HiqJWT
   module DefaultOptions
     DEFAULT_OPTIONS = {
       verify_expiration: true,

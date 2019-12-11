@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'jwt'
+require 'hiq-jwt'
 
-describe JWT::JWK do
+describe HiqJWT::JWK do
   let(:rsa_key) { OpenSSL::PKey::RSA.new(2048) }
 
   describe '.import' do
@@ -13,7 +13,7 @@ describe JWT::JWK do
     subject { described_class.import(params) }
 
     it 'creates a ::JWT::JWK::RSA instance' do
-      expect(subject).to be_a ::JWT::JWK::RSA
+      expect(subject).to be_a ::HiqJWT::JWK::RSA
       expect(subject.export).to eq(params)
     end
 
@@ -21,7 +21,7 @@ describe JWT::JWK do
       let(:params) { { kty: 'unsupported' } }
 
       it 'raises an error' do
-        expect { subject }.to raise_error(JWT::JWKError)
+        expect { subject }.to raise_error(HiqJWT::JWKError)
       end
     end
   end
@@ -31,13 +31,13 @@ describe JWT::JWK do
 
     context 'when RSA key is given' do
       let(:keypair) { rsa_key }
-      it { is_expected.to be_a ::JWT::JWK::RSA }
+      it { is_expected.to be_a ::HiqJWT::JWK::RSA }
     end
 
     context 'when unsupported key is given' do
       let(:keypair) { 'key' }
       it 'raises an error' do
-        expect { subject }.to raise_error(::JWT::JWKError, 'Cannot create JWK from a String')
+        expect { subject }.to raise_error(::HiqJWT::JWKError, 'Cannot create JWK from a String')
       end
     end
   end

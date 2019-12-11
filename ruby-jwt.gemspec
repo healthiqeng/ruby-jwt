@@ -1,17 +1,17 @@
 lib = File.expand_path('../lib/', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'jwt/version'
+require 'hiq-jwt/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'jwt'
-  spec.version = JWT.gem_version
+  spec.name = 'hiq-hiq-jwt'
+  spec.version = HiqJWT.gem_version
   spec.authors = [
-    'Tim Rudat'
+    'Jack Dunham'
   ]
-  spec.email = 'timrudat@gmail.com'
+  spec.email = 'jack.dunham@healthiq.com'
   spec.summary = 'JSON Web Token implementation in Ruby'
   spec.description = 'A pure ruby implementation of the RFC 7519 OAuth JSON Web Token (JWT) standard.'
-  spec.homepage = 'https://github.com/jwt/ruby-jwt'
+  spec.homepage = 'https://github.com/hiq-hiq-jwt/ruby-hiq-hiq-jwt'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.1'
 

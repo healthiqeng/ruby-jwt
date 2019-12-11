@@ -1,19 +1,19 @@
 # frozen_string_literal: true
 
-require 'jwt/base64'
-require 'jwt/json'
-require 'jwt/decode'
-require 'jwt/default_options'
-require 'jwt/encode'
-require 'jwt/error'
-require 'jwt/jwk'
+require 'hiq-jwt/base64'
+require 'hiq-jwt/json'
+require 'hiq-jwt/decode'
+require 'hiq-jwt/default_options'
+require 'hiq-jwt/encode'
+require 'hiq-jwt/error'
+require 'hiq-jwt/jwk'
 
 # JSON Web Token implementation
 #
 # Should be up to date with the latest spec:
 # https://tools.ietf.org/html/rfc7519
-module JWT
-  include JWT::DefaultOptions
+module HiqJWT
+  include HiqJWT::DefaultOptions
 
   module_function
 

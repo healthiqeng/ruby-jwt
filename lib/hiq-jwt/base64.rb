@@ -2,7 +2,7 @@
 
 require 'base64'
 
-module JWT
+module HiqJWT
   # Base64 helpers
   class Base64
     class << self

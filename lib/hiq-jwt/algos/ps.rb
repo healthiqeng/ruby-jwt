@@ -1,4 +1,4 @@
-module JWT
+module HiqJWT
   module Algos
     module Ps
       # RSASSA-PSS signing algorithms
@@ -32,10 +32,10 @@ module JWT
           major, minor = OpenSSL::VERSION.split('.').first(2)
 
           unless major.to_i >= 2 && minor.to_i >= 1
-            raise JWT::RequiredDependencyError, "You currently have OpenSSL #{OpenSSL::VERSION}. PS support requires >= 2.1"
+            raise HiqJWT::RequiredDependencyError, "You currently have OpenSSL #{OpenSSL::VERSION}. PS support requires >= 2.1"
           end
         else
-          raise JWT::RequiredDependencyError, 'PS signing requires OpenSSL +2.1'
+          raise HiqJWT::RequiredDependencyError, 'PS signing requires OpenSSL +2.1'
         end
       end
     end

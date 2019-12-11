@@ -3,7 +3,7 @@
 require_relative './claims_validator'
 
 # JWT::Encode module
-module JWT
+module HiqJWT
   # Encoding logic for JWT
   class Encode
     ALG_NONE = 'none'.freeze
@@ -54,11 +54,11 @@ module JWT
     def encode_signature
       return '' if @algorithm == ALG_NONE
 
-      JWT::Base64.url_encode(JWT::Signature.sign(@algorithm, encoded_header_and_payload, @key))
+      HiqJWT::Base64.url_encode(HiqJWT::Signature.sign(@algorithm, encoded_header_and_payload, @key))
     end
 
     def encode(data)
-      JWT::Base64.url_encode(JWT::JSON.generate(data))
+      HiqJWT::Base64.url_encode(HiqJWT::JSON.generate(data))
     end
 
     def combine(*parts)

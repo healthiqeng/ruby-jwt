@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'jwt/claims_validator'
+require 'hiq-jwt/claims_validator'
 
-RSpec.describe JWT::ClaimsValidator do
+RSpec.describe HiqJWT::ClaimsValidator do
   describe '#validate!' do
     it 'returns true if the payload is valid' do
       valid_payload = { 'exp' => 12345 }
@@ -13,20 +13,20 @@ RSpec.describe JWT::ClaimsValidator do
     shared_examples_for 'an integer claim' do |claim|
       it "raises an error when the value of the #{claim} claim is a string" do
         subject = described_class.new({ claim => '1' })
-        expect { subject.validate! }.to raise_error JWT::InvalidPayload
+        expect { subject.validate! }.to raise_error HiqJWT::InvalidPayload
       end
 
       it "raises an error when the value of the #{claim} claim is a Time object" do
         subject = described_class.new({ claim => Time.now })
-        expect { subject.validate! }.to raise_error JWT::InvalidPayload
+        expect { subject.validate! }.to raise_error HiqJWT::InvalidPayload
       end
 
       it "validates the #{claim} claim when the key is either a string or a symbol" do
         symbol = described_class.new({ claim.to_sym => true })
-        expect { symbol.validate! }.to raise_error JWT::InvalidPayload
+        expect { symbol.validate! }.to raise_error HiqJWT::InvalidPayload
 
         string = described_class.new({ claim.to_s => true })
-        expect { string.validate! }.to raise_error JWT::InvalidPayload
+        expect { string.validate! }.to raise_error HiqJWT::InvalidPayload
       end
     end
 

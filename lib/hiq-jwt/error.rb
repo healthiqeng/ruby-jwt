@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module JWT
+module HiqJWT
   EncodeError             = Class.new(StandardError)
   DecodeError             = Class.new(StandardError)
   RequiredDependencyError = Class.new(StandardError)

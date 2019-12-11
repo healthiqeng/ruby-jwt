@@ -2,7 +2,7 @@
 # frozen_string_literal: true
 
 # Moments version builder module
-module JWT
+module HiqJWT
   def self.gem_version
     Gem::Version.new VERSION::STRING
   end
@@ -10,9 +10,9 @@ module JWT
   # Moments version builder module
   module VERSION
     # major version
-    MAJOR = 2
+    MAJOR = 0
     # minor version
-    MINOR = 2
+    MINOR = 0
     # tiny version
     TINY  = 1
     # alpha, beta, etc. tag

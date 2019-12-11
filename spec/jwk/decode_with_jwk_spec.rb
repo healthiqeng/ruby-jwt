@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 require_relative '../spec_helper'
-require 'jwt'
+require 'hiq-jwt'
 
-describe JWT do
+describe HiqJWT do
   describe '.decode for JWK usecase' do
     let(:keypair)       { OpenSSL::PKey::RSA.new(2048) }
-    let(:jwk)           { JWT::JWK.new(keypair) }
+    let(:jwk)           { HiqJWT::JWK.new(keypair) }
     let(:public_jwks) { { keys: [jwk.export, { kid: 'not_the_correct_one' }] } }
     let(:token_payload) { {'data' => 'something'} }
     let(:token_headers) { { kid: jwk.kid } }
@@ -15,7 +15,7 @@ describe JWT do
     context 'when JWK features are used manually' do
       it 'is able to decode the token' do
         payload, _header = described_class.decode(signed_token, nil, true, { algorithms: ['RS512'] }) do |header, _payload|
-          JWT::JWK.import(public_jwks[:keys].find { |key| key[:kid] == header['kid'] }).keypair
+          HiqJWT::JWK.import(public_jwks[:keys].find { |key| key[:kid] == header['kid'] }).keypair
         end
         expect(payload).to eq(token_payload)
       end
@@ -35,7 +35,7 @@ describe JWT do
         end
         it 'raises an exception' do
           expect { described_class.decode(signed_token, nil, true, { algorithms: ['RS512'], jwks: public_jwks}) }.to raise_error(
-            JWT::DecodeError, /Could not find public key for kid .*/
+                                                                                                                         HiqJWT::DecodeError, /Could not find public key for kid .*/
           )
         end
       end
@@ -44,7 +44,7 @@ describe JWT do
         let(:token_headers) { {} }
         it 'raises an exception' do
           expect { described_class.decode(signed_token, nil, true, { algorithms: ['RS512'], jwks: public_jwks}) }.to raise_error(
-            JWT::DecodeError, 'No key id (kid) found from token headers'
+                                                                                                                         HiqJWT::DecodeError, 'No key id (kid) found from token headers'
           )
         end
       end

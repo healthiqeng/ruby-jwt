@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require_relative '../spec_helper'
-require 'jwt'
+require 'hiq-jwt'
 
-describe JWT::JWK::RSA do
+describe HiqJWT::JWK::RSA do
   let(:rsa_key) { OpenSSL::PKey::RSA.new(2048) }
 
   describe '.new' do
