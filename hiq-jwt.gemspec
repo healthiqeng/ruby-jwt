@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'hiq-jwt/version'
 
 Gem::Specification.new do |spec|
-  spec.name = 'hiq-hiq-jwt'
+  spec.name = 'hiq-jwt'
   spec.version = HiqJWT.gem_version
   spec.authors = [
     'Jack Dunham'
@@ -11,11 +11,11 @@ Gem::Specification.new do |spec|
   spec.email = 'jack.dunham@healthiq.com'
   spec.summary = 'JSON Web Token implementation in Ruby'
   spec.description = 'A pure ruby implementation of the RFC 7519 OAuth JSON Web Token (JWT) standard.'
-  spec.homepage = 'https://github.com/hiq-hiq-jwt/ruby-hiq-hiq-jwt'
+  spec.homepage = 'https://github.com/healthiqeng/ruby-jwt.git'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 2.1'
 
-  spec.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec|gemfiles|coverage|bin)/}) }
+  spec.files = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec|gemfiles|coverage|bin)/}) || f.end_with?('.gem')}
   spec.executables = []
   spec.test_files = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = %w[lib]
